@@ -1,0 +1,2 @@
+class BackupLogger:
+    pass

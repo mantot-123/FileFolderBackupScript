@@ -1,7 +1,4 @@
 import os
-import time
-import shutil
-import re
 from pathlib import Path
 
 class BackupConfig:
@@ -14,7 +11,7 @@ class BackupConfig:
 
     '''
     path and file check flags:
-    0 - path/file not specified
+    0 - path/file name not specified (shown by asterisk)
     1 - path/file exists
     -1 - path/file does NOT exist
     '''
@@ -23,38 +20,38 @@ class BackupConfig:
         if self.selected_file.strip() == "":
             return 0
 
-        # -- check if the source path exists --
+        # -- check if the source directory exists --
         full_path_str = os.path.join(Path(self.source_path), self.selected_file)
         full_path_obj = Path(full_path_str)
-        if full_path_obj.is_file():
+        if os.path.isfile(full_path_obj):
             return 1
         
         return -1
     
     def check_source_path(self) -> int:
-        # -- checks if the source path is specified --
+        # -- checks if the source directory is specified --
         if self.source_path.strip() == "":
             return 0
         
-        # -- check if the source path exists --
-        if os.path.exists(self.source_path):
+        # -- check if the source directory exists --
+        if os.path.isdir(self.source_path):
             return 1
         
         return -1
     
     def check_dest_path(self) -> int:
-        # -- checks if the destination path is specified --
+        # -- checks if the destination directory is specified --
         if self.destination_path.strip() == "":
             return 0
 
-        # -- check if the destination path already exists --
-        if os.path.exists(self.destination_path):
+        # -- check if the destination directory already exists --
+        if os.path.isdir(self.destination_path):
             return 1
         
         return -1
     
     # check if the backup filename is specified in the config file
-    def check_backup_name(self) -> int:
+    def check_backup_name(self) -> bool:
         if self.backup_name == "":
-            return 0
-        return 1
+            return False
+        return True
