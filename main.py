@@ -1,64 +1,72 @@
-import configparser
+import sys
+import argparse
+
+from google_auth_oauthlib.flow import google
+import google_drive_manager
 from backup_config import BackupConfig
-from backup_manager import BackupManager
+from local_backup_manager import LocalBackupManager
 from pathlib import Path
 
-# temporary solution - might use command line arguments instead of configuration files in the later release
-def load_config_file():
-    config_path = Path("config.ini")
-
-    # if the config file currently does not exist, automatically create it with blank keys 
-    # (except the compress flag)
-    if not config_path.is_file():
-        config = configparser.ConfigParser()
-        config['DEFAULT'] = {
-            'SOURCE_PATH': '',
-            'DESTINATION_PATH': '',
-            'TARGET_FILE': '',
-            'BACKUP_NAME': '',
-            'COMPRESS_BACKUP': '0'
-        }
-        with open("config.ini", "w") as config_file:
-            config.write(config_file)
-
-    config = configparser.ConfigParser()
-    config.read("config.ini")
-    return config
-
 def main():
-    config_file = load_config_file()
+    parser = argparse.ArgumentParser(
+        prog="File Backup Script",
+        description="File Backup Script || by mantot_123 || github.com/mantot-123"
+    )
+    parser.add_argument("-s", "--source_path", help="Specifies the source directory. Required.")
+    parser.add_argument("-d", "--dest_path", help="Specifies the destination directory where the file should be backed up. Required.")
+    parser.add_argument("-t", "--target_file", help="Specifies the target file located in the source directory to backup. If not specified, the script will backup the whole source directory.")
+    parser.add_argument("-b", "--backup_name", help="Sets a custom name for the backed up file. If blank, the script will automatically name it.")
+    parser.add_argument("-c", "--compress", help="Sets a flag to compress or not compress the file after copying. 0 - DON'T COMPRESS, 1 = COMPRESS. Default value will be 0.")
+    parser.add_argument(
+        "--cloud",
+        nargs="*",
+        choices=["google_drive"],
+        help=f"Specify a list of cloud providers to upload the file to after backup."
+    )
+    
+    args = parser.parse_args()
 
-    source_path = config_file["DEFAULT"]["SOURCE_PATH"].strip()
-    dest_path = config_file["DEFAULT"]["DESTINATION_PATH"].strip()
-    target_file = config_file["DEFAULT"]["TARGET_FILE"].strip()
-    backup_name = config_file["DEFAULT"]["BACKUP_NAME"].strip()
-    compress_backup = config_file["DEFAULT"]["COMPRESS_BACKUP"].strip()
-    compress_backup_str = "YES" if compress_backup == "1" else "NO"
-
-    config_keys_empty = not source_path or not dest_path or not target_file
-    bad_cpress_flag = compress_backup != "0" and compress_backup != "1"
-
-    if config_keys_empty or bad_cpress_flag:
-        print("The configuration file (config.ini) is missing some settings or has invalid data. Please make sure you have set these settings for the file properly and then try again:\n- Source path\n- Destination path\n- Target file to backup\n- Custom backup name (OPTIONAL)\n- Switch to compress the file after backup")
+    if len(sys.argv) < 1:
+        parser.print_help()
         return
 
-    print("Source Path:", source_path)
-    print("Destination Path:", dest_path)
-    print("Target File:", target_file)
-    print("Backup Name:", backup_name)
-    print("Compress output file:", compress_backup_str)
+    source_path = "" if not args.source_path else args.source_path
+    dest_path = "" if not args.dest_path else args.dest_path
+    target_file = "" if not args.target_file else args.target_file
+    backup_name = "" if not args.backup_name else args.backup_name
 
-    config: BackupConfig = BackupConfig(source_path, dest_path, target_file, backup_name, compress_backup)
-    manager: BackupManager = BackupManager(config)
+    compress_backup = "" if not args.compress else args.compress
+    compress_backup = "0" if compress_backup != "1" else "1"
+
+    cloud = args.cloud
+
+    if not source_path:
+        raise ValueError("ERROR: Please specify a source directory")
+
+    if not dest_path:
+        raise ValueError("ERROR: Please specify a destination directory")
+
+    config: BackupConfig = BackupConfig(source_path, dest_path, target_file, backup_name, compress_backup, cloud)
+    manager: LocalBackupManager = LocalBackupManager(config)
 
     print("Performing backup...")
     backup = manager.perform_backup()
 
     if backup != None:
-        print(f"Backup successfully created. The output file is located at: {str(backup)}")
+        if "google_drive" in cloud:
+            creds = google_drive_manager.authorise()
+            google_drive_manager.upload(creds, backup)
+            print("Backing up to Google Drive...")
+
+        if "onedrive" in cloud:
+            pass
+        
+        if "dropbox" in cloud:
+            pass
+
+        print(f"Backup successfully created. The output file is located locally at: {str(backup)}")
     else:
         print("Backup failed. Please check that the source file exists and try again")
-
 
 if __name__ == "__main__":
     main()

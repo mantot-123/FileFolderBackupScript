@@ -2,12 +2,13 @@ import os
 from pathlib import Path
 
 class BackupConfig:
-    def __init__(self, source_path, destination_path, selected_file, backup_name, compress_backup):
+    def __init__(self, source_path, destination_path, selected_file, backup_name, compress_backup, cloud_providers):
         self.source_path = source_path.strip()
         self.destination_path = destination_path.strip()
         self.selected_file = selected_file.strip()
         self.backup_name = backup_name.strip()
         self.compress_backup = compress_backup.strip()
+        self.cloud_providers = cloud_providers
 
     '''
     path and file check flags:

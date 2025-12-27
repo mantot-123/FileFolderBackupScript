@@ -6,17 +6,19 @@ import datetime
 from backup_config import BackupConfig
 from pathlib import Path
 
-class BackupManager:
+class LocalBackupManager:
     def __init__(self, config: BackupConfig):
         self.config = config
-        logging.basicConfig(filename=f"logs/[LOG]-{self.name_backup()}.log", level=logging.INFO)
+        self.set_backup_name = self.name_backup()
+        logging.basicConfig(filename=f"logs/[LOG]-{self.set_backup_name}.log", level=logging.INFO)
         self.logger = logging.getLogger(__name__)
 
     def perform_backup(self) -> Path:
         backup_path = self.copy_file()
 
         if self.config.compress_backup == "1" and backup_path != None:
-            compress = self.compress_backup(backup_path)
+            compress_path = self.compress_backup(backup_path)
+            return compress_path
 
         return backup_path
    
@@ -82,12 +84,12 @@ class BackupManager:
             # when using the shutil copy methods and providing it the "dest",
             # it expects the destination directory and the name the file should be after it's copied
             if file_check == 0: # run if we are backing up an entire directory
-                backup_name = self.name_backup()
+                backup_name = self.set_backup_name
                 dest_dir_path = os.path.join(self.config.destination_path, backup_name)
                 shutil.copytree(full_path, dest_dir_path)
                 new_path = dest_dir_path
             else: # run if we are trying to backup a file
-                new_name = self.name_backup()
+                new_name = self.set_backup_name
                 dest_file_path = os.path.join(self.config.destination_path, new_name)
                 shutil.copy2(full_path, dest_file_path)
                 new_path = dest_file_path
@@ -102,7 +104,7 @@ class BackupManager:
         pass
 
     # (optionally, in the config file) compress the output file/folder into a ZIP file
-    def compress_backup(self, backup_path) -> bool:
+    def compress_backup(self, backup_path) -> Path:
         zip_name = f"{backup_path}.zip"
 
         # if it's a file, then create strip away the backed up file's extension from the zip's name
@@ -142,8 +144,8 @@ class BackupManager:
                 os.remove(backup_path)
 
             self.logger.info("Compression successful!")
-            self.logger.info(f"{backup_path}")
-            return True
+            return Path(zip_name)
         except Exception as e:
-            self.logger.error(f"Compression failed: {e}")
-            return False
+            message = f"Compression failed: {e}"
+            self.logger.error(message)
+            raise Exception(message)

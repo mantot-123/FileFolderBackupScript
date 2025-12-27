@@ -1,7 +1,0 @@
-INFO:backup_manager:Successfully copied C:\Users\medin\Documents\Coding projects\FileFolderBackupScriptPython\test_backup_config_src to the new directory: C:\Users\medin\Documents\Coding projects\FileFolderBackupScriptPython\backups_example\test_backup_config_src-BACKUP-24-Dec-2025 21.12.843
-INFO:backup_manager:ZIP file: C:\Users\medin\Documents\Coding projects\FileFolderBackupScriptPython\backups_example\test_backup_config_src-BACKUP-24-Dec-2025 21.12.843.zip
-INFO:backup_manager:Successfully added to ZIP: C:\Users\medin\Documents\Coding projects\FileFolderBackupScriptPython\backups_example\test_backup_config_src-BACKUP-24-Dec-2025 21.12.843\test_file1.txt
-INFO:backup_manager:Successfully added to ZIP: C:\Users\medin\Documents\Coding projects\FileFolderBackupScriptPython\backups_example\test_backup_config_src-BACKUP-24-Dec-2025 21.12.843\test_file1.txt
-INFO:backup_manager:Successfully added to ZIP: C:\Users\medin\Documents\Coding projects\FileFolderBackupScriptPython\backups_example\test_backup_config_src-BACKUP-24-Dec-2025 21.12.843\test_nested_directory\test_file2.txt
-INFO:backup_manager:Compression successful!
-INFO:backup_manager:C:\Users\medin\Documents\Coding projects\FileFolderBackupScriptPython\backups_example\test_backup_config_src-BACKUP-24-Dec-2025 21.12.843

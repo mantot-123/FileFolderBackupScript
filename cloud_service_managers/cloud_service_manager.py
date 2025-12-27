@@ -1,0 +1,2 @@
+class CloudServiceManager:
+    pass
