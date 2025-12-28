@@ -1,3 +1,4 @@
+import logging
 import sys
 import argparse
 
@@ -42,6 +43,9 @@ def get_cmd_parser():
     return (parser, args)
 
 def main():
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
     parser = get_cmd_parser()[0]
     args = get_cmd_parser()[1]
 

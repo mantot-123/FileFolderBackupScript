@@ -8,8 +8,7 @@ import google_drive_manager
 from backup_config import BackupConfig
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger = logging.getLogger()
 
 class LocalBackupManager:
     def __init__(self, config: BackupConfig):
@@ -56,7 +55,6 @@ class LocalBackupManager:
         try:
             if "google_drive" in self.config.cloud_providers:
                 current_service = "Google Drive"
-                logger.info(f"Backing up output file/folder to Google Drive: {output_path}")
                 creds = google_drive_manager.authorise()
                 google_drive_manager.upload(creds, output_path)
 

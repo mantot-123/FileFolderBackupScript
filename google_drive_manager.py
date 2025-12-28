@@ -14,6 +14,8 @@ from googleapiclient.http import MediaFileUpload
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 
+logger = logging.getLogger()
+
 def authorise():
 	creds = None
 	# The file token.json stores the user's access and refresh tokens, and is
@@ -48,16 +50,17 @@ def upload(creds, backup_path):
 
 		media = MediaFileUpload(backup_path, resumable=True)
 
-		print(f"Uploading file {file_metadata['name']} to Google Drive...")
+		logger.info(f"Uploading file {file_metadata['name']} to Google Drive...")
+
 		output = (
 			service.files()
 			.create(body=file_metadata, media_body=media, fields="id, name")
 			.execute()
 		)
 
-		print(f"Upload successful!")
+		logger.info(f"Upload successful!")
 		return output
 	except HttpError as error:
 		# handle API error
-		print(f"An error occurred while uploading the file: {error}")
+		logger.info(f"An error occurred while uploading the file: {error}")
 		
