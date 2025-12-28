@@ -68,6 +68,10 @@ class LocalBackupManager:
                 # TODO DROPBOX BACKUP HERE
                 pass
 
+            if "amazon_s3" in self.config.cloud_providers:
+                # TODO AMAZON S3 BACKUP HERE
+                pass
+
         except Exception as e:
             error_msg = f"Error while syncing output file {output_path} to cloud service {current_service}: {e}"
             logger.error(error_msg)
