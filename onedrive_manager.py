@@ -1,4 +1,4 @@
-def authenticate():
+def authorise():
     pass
 
 def upload():

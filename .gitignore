@@ -5,4 +5,5 @@ test_backup_config.py
 logs
 config.ini
 client_secrets_GoogleDrive.json
+token_GoogleDrive.json
 token.json

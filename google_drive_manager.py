@@ -11,18 +11,18 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 
-# If modifying these scopes, delete the file token.json.
+# If modifying these scopes, delete the file token_GoogleDrive.json.
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 
 logger = logging.getLogger()
 
 def authorise():
 	creds = None
-	# The file token.json stores the user's access and refresh tokens, and is
+	# The file token_GoogleDrive.json stores the user's access and refresh tokens, and is
 	# created automatically when the authorization flow completes for the first
 	# time.
-	if os.path.exists("token.json"):
-		creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+	if os.path.exists("token_GoogleDrive.json"):
+		creds = Credentials.from_authorized_user_file("token_GoogleDrive.json", SCOPES)
 	# If there are no (valid) credentials available, let the user log in.
 	if not creds or not creds.valid:
 		if creds and creds.expired and creds.refresh_token:
@@ -33,7 +33,7 @@ def authorise():
 			)
 			creds = flow.run_local_server(port=0)
 		# Save the credentials for the next run
-		with open("token.json", "w") as token:
+		with open("token_GoogleDrive.json", "w") as token:
 			token.write(creds.to_json())
 	return creds
 
@@ -45,7 +45,8 @@ def upload(creds, backup_path):
 		# set file metadata for the output file (the file that is uploaded to google drive)
 		file_metadata = {
 			"name": os.path.basename(backup_path),
-			"mimeType": mimetype
+			"mimeType": mimetype,
+			"parents": [] # <== TO UPLOAD FILES TO A PARTICULAR FOLDER, ADD ITS FOLDER ID HERE 
 		}
 
 		media = MediaFileUpload(backup_path, resumable=True)

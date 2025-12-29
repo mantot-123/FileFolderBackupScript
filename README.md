@@ -5,6 +5,8 @@ Credit:
 ## About
 A Python-based script to backup files and directories locally and upload them to other cloud services. It currently only has support for Google Drive, however, support for other cloud services is planned for future releases.
 
+My initial motivation for making this script was that I wanted an easier way to keep track of changes in my CV (so more naming them just by version numbers) without much intervention. However, that eventually evolved into something I can use across every important file that I use, so why not make a simple but general tool to back up files and sync them across multiple cloud storage platforms?
+
 NOTE: I've only coded and tested this script on Windows so far, so I cannot guarantee that this script will also work on Linux and MacOS. Please use this at your own risk.
 
 ### Features (current)
@@ -13,10 +15,12 @@ NOTE: I've only coded and tested this script on Windows so far, so I cannot guar
 
 
 ### Features (planned)
-* **Add support for more cloud services:**
+* **Add support for more cloud storage services, including some enterprise ones:**
     * Microsoft OneDrive
     * Dropbox
+    * MEGA
     * Amazon S3
+    * Azure Blob
 * A watch feature to automatically back up the file/directory if it detects that its contents have changed
 
 
