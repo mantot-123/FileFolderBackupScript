@@ -1,2 +1,5 @@
-class OneDriveManager:
+def authenticate():
+    pass
+
+def upload():
     pass

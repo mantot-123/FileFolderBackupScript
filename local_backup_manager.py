@@ -60,14 +60,17 @@ class LocalBackupManager:
 
             if "onedrive" in self.config.cloud_providers:
                 # TODO ONEDRIVE BACKUP HERE
+                current_service = "OneDrive"
                 pass
             
             if "dropbox" in self.config.cloud_providers:
                 # TODO DROPBOX BACKUP HERE
+                current_service = "Dropbox"
                 pass
 
             if "amazon_s3" in self.config.cloud_providers:
                 # TODO AMAZON S3 BACKUP HERE
+                current_service = "Amazon S3"
                 pass
 
         except Exception as e:
@@ -138,32 +141,37 @@ class LocalBackupManager:
                 return None
 
         # copy operation here
-        new_dest_path = None
+        output_path = None
         try:
             # when using the shutil copy methods and providing it the "dest",
             # it expects the destination directory and the name the file should be after it's copied
+            backup_name = self.output_backup_name
+            output_path = os.path.join(self.config.destination_path, backup_name)
+
+            # allow windows to exceed the 260-character path limit - prevents any errors
+            if os.name == "nt":
+                # extend the output path
+                if not output_path.startswith("\\\\?\\"):
+                    output_path = "\\\\?\\" + os.path.abspath(output_path)
+                # extend the input path
+                if not str(full_path).startswith("\\\\?\\"):
+                    full_path = Path('\\\\?\\' + os.path.abspath(full_path))
 
             if file_check == 0: # run if we are backing up an entire directory
-                backup_name = self.output_backup_name
-                new_dest_path = os.path.join(self.config.destination_path, backup_name)
-                shutil.copytree(full_path, new_dest_path)
-                new_path = new_dest_path
+                shutil.copytree(full_path, output_path)
             else: # run if we are trying to backup a file
-                new_name = self.output_backup_name
-                new_dest_path = os.path.join(self.config.destination_path, new_name)
                 # shutil.copyfile(full_path, new_dest_path) # don't use this, it does not keep original metadata
-                shutil.copy2(full_path, new_dest_path) # this one keeps all the original metadata
-                new_path = new_dest_path
+                shutil.copy2(full_path, output_path) # this one keeps all the original metadata
         except Exception as e:
             error_msg = f"An error occurred while attempting to copy the file to the directory {self.config.destination_path}: {e}"
             logger.error(error_msg)
 
-            self.delete_copy(new_dest_path) # discards the file/directory in process in case of an error
+            self.delete_copy(output_path) # discards the file/directory in process in case of an error
             return None
 
-        success_msg = f"Successfully copied {full_path} to the new directory: {new_path}"
+        success_msg = f"Successfully copied {full_path} to the new directory: {output_path}"
         logger.info(success_msg)
-        return new_path
+        return output_path
 
     # TODO
     def delete_copy(self, path):
@@ -188,11 +196,14 @@ class LocalBackupManager:
                 if os.path.isdir(backup_path):
                     base_dir = os.path.basename(backup_path)
                     # os.walk() - array of tuples
+
+                    # goes through the directory and its subdirectories - sort of like a depth first style
                     for root, dirs, files in os.walk(backup_path):
                         for f in files:
                             file_path = os.path.join(root, f)
                             arcdir = os.path.join(base_dir, os.path.relpath(file_path, backup_path))
                             zip_file.write(file_path, arcdir)
+                            logger.info(f"Successfully added to ZIP: {file_path}")
 
                         # consider all of the empty subdirectories
                         if not files and not dirs:
@@ -200,8 +211,8 @@ class LocalBackupManager:
                             arcdir = os.path.join(base_dir, os.path.relpath(root, backup_path)) + "/"
                             # zip_file.writestr(base_dir, arcdir) # doesn't add the empty directories
                             zip_file.writestr(arcdir, "") 
-
-                        logger.info(f"Successfully added to ZIP: {file_path}")
+                            logger.info(f"Successfully added to ZIP: {arcdir}")
+                        
                 else:
                     zip_file.write(backup_path, os.path.basename(backup_path))
                     logger.info(f"Successfully added file to ZIP: {backup_path}")
