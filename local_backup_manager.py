@@ -16,8 +16,14 @@ class LocalBackupManager:
         self.output_backup_name = self.name_backup()
         self.setup_logging()
 
+    # set up file and console based logging
     def setup_logging(self):
         # logging.basicConfig(filename=f"logs/[LOG]-{self.output_backup_name}.log", level=logging.DEBUG)
+        
+        # remove any existing handlers to prevent duplicates on successive backups
+        for handler in logger.handlers[:]:
+            logger.removeHandler(handler)
+        
         file_handler = logging.FileHandler(f"logs/[LOG]-{self.output_backup_name}.log")
         file_handler.setLevel(logging.DEBUG)
 
@@ -47,7 +53,11 @@ class LocalBackupManager:
             else:
                 self.upload_to_cloud(backup_path)
 
-        logger.info(f"Backup successfully created. The output file is located locally at: {str(backup_path)}")
+        if is_compressed:
+            logger.info(f"Backup successfully created. The output file is located locally at: {str(compress_path)}")
+        else:
+            logger.info(f"Backup successfully created. The output file is located locally at: {str(backup_path)}")
+            
         return backup_path
    
     def upload_to_cloud(self, output_path):
