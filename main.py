@@ -39,14 +39,22 @@ class LocalBackupWorker(FileSystemEventHandler):
         if self.debounce_timer:
             self.debounce_timer.cancel()
         
-        self.debounce_timer = threading.Timer(self.debounce_delay, self.run_backup)
+        self.debounce_timer = threading.Timer(self.debounce_delay, self.run_backup, args=[event])
         self.debounce_timer.start()
 
-    def run_backup(self):
-        self.logger.info("Starting backup...")
+    def run_backup(self, event):
         try:
-            manager = LocalBackupManager(self.config)
-            manager.perform_backup()
+            # if there is a target file, check if the event was actually triggered
+            # by the target file
+            if self.config.selected_file != "":
+                if os.path.join(self.config.source_path, self.config.selected_file) == event.src_path:
+                    self.logger.info("Starting backup...")
+                    manager = LocalBackupManager(self.config)
+                    manager.perform_backup()
+            else:
+                self.logger.info("Starting backup...")
+                manager = LocalBackupManager(self.config)
+                manager.perform_backup()
         except Exception as e:
             self.logger.error(f"Backup failed: {e}")
         finally:
