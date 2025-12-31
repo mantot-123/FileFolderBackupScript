@@ -79,6 +79,9 @@ def get_cmd_parser():
     parser.add_argument("-c", "--compress", 
         help="Sets a flag to compress or not compress the file after copying. 0 - DON'T COMPRESS, 1 = COMPRESS. Default value will be 0.", 
         default="0")
+    parser.add_argument("-w", "--watchdog", 
+        help="EXPERIMENTAL. Sets a flag to EITHER run the backup straight away and exit (0) OR continuously scan the specified directory/file for any changes and run the backup everytime it detects one. (1)", 
+        default="0")
     parser.add_argument(
         "--cloud",
         nargs="*",
@@ -108,6 +111,7 @@ def main():
     backup_name = args.backup_name
     compress_backup = args.compress
     cloud = args.cloud
+    watchdog = args.watchdog
 
     if not source_path:
         raise ValueError("ERROR: Please specify a source directory")
@@ -117,22 +121,27 @@ def main():
 
     config = BackupConfig(source_path, dest_path, target_file, backup_name, compress_backup, cloud)
 
-    observer = Observer()
-    handler = LocalBackupWorker(observer, logger, config)
+    if watchdog == "1":
+        observer = Observer()
+        handler = LocalBackupWorker(observer, logger, config)
 
-    # main event handler, use recursive=True to monitor all subdirectories
-    # runs on a separate background thread
-    observer.schedule(handler, os.path.join(source_path, target_file), recursive=True)
-    observer.start()
+        # main event handler, use recursive=True to monitor all subdirectories
+        # runs on a separate background thread
+        observer.schedule(handler, source_path, recursive=True)
+        observer.start()
 
-    try:
-        logger.info("Main backup thread started.")
-        while True:
-            time.sleep(1) # small delay to avoid CPU overloading - gives it some time to free up resources
-    except KeyboardInterrupt:
-        logger.info("Terminating...")
-        observer.stop()
-    observer.join()
+        try:
+            logger.info("Main backup thread started.")
+            while True:
+                time.sleep(1) # small delay to avoid CPU overloading - gives it some time to free up resources
+        except KeyboardInterrupt:
+            logger.info("Terminating...")
+            observer.stop()
+        observer.join()
+    else:
+        manager = LocalBackupManager(config)
+        manager.perform_backup()
+
 
 
 if __name__ == "__main__":
