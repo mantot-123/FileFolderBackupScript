@@ -12,6 +12,7 @@ NOTE: I've only coded and tested this script on Windows so far, so I cannot guar
 ### Features (current)
 * **Local and cloud backups** - Automatically backs up files and folders locally, with also an option to upload to multiple cloud services
 * **Compression** - Compress backups into ZIP files for easier storage and transfer
+* **File change monitor** - Automatically backs up the file/directory if it detects that its contents have changed. Currently experimental, so this feature is optional.
 
 
 ### Features (planned)
@@ -21,7 +22,6 @@ NOTE: I've only coded and tested this script on Windows so far, so I cannot guar
     * MEGA
     * Amazon S3
     * Azure Blob
-* A watch feature to automatically back up the file/directory if it detects that its contents have changed
 
 
 ## Setup
